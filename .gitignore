@@ -3,4 +3,4 @@ volumes
 __pycache__
 env
 text-search-engine/server/logs
-text-search-engine/server/en   
+text-search-engine/server/en

@@ -23,15 +23,17 @@ def setup_test(url: str):
     resp = requests.post(url + "load")
     print(resp.text)
 
-    print("\nConfirming 160 items in Milvus database ...")
+    print("\nConfirming 160 items in Milvus ...")
     resp = requests.post(url + "count")
     assert 160 == int(resp.text)
     print('"Confirmed"')
 
-    print("\nWarming up for 10 iterations ...")
+    print("\nWarming up for 10 iterations + clearing latency tracker...")
     for _ in range(10):
         resp = requests.get(url + "search", QUERY)
         assert len(json.loads(resp.text).keys()) == 9
+    requests.post(url + "latency")
+    
     print("Requests working + warmed up.")
 
 class ExecutorThread(threading.Thread):
@@ -70,11 +72,6 @@ def run_test(url: str, num_clients:int, iters_per_client:int):
         thread.join()
     print("Done Running.")
 
-    print("\nQuery Output:")
-    resp = json.loads(requests.get(url + "search", QUERY).text)
-    for idx in resp:
-        print(resp[idx]['title'])
-
     print("\nModel Latency Stats:")
     resp = requests.post(url + "latency")
     pprint(json.loads(resp.text))
@@ -84,13 +81,16 @@ def run_test(url: str, num_clients:int, iters_per_client:int):
     assert len(batch_times) == iters_per_client * num_clients
     batch_times_ms = [(batch_time[1] - batch_time[0]) * 1000 for batch_time in batch_times]
     pprint({
-        'num_clients': num_clients,
-        'iters_per_client': iters_per_client,
-        'iterations': len(batch_times),
+        'count': len(batch_times),
         'median': numpy.median(batch_times_ms),
         'mean': numpy.mean(batch_times_ms),
         'std': numpy.std(batch_times_ms)
     })
+
+    print("\nQuery Output:")
+    resp = json.loads(requests.get(url + "search", QUERY).text)
+    for idx in resp:
+        print(resp[idx]['title'])
 
 if __name__ == "__main__":
     args = vars(parser.parse_args())
