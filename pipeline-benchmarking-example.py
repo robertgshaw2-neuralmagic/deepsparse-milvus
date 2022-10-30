@@ -49,8 +49,6 @@ class ExecutorThread(threading.Thread):
             _, start, end = self.iteration(self._input)
             self._time_queue.put([start, end])
 
-
-
 def run_benchmarking(
     schedule_type: str = SCHEDULE,
     num_clients: int = NUM_CLIENTS,

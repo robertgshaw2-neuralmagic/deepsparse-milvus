@@ -1,0 +1,6 @@
+numpy
+pymilvus==2.0.1
+fastapi
+uvicorn
+deepsparse
+onnxruntime
