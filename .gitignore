@@ -1,3 +1,6 @@
 volumes
 .ipynb_checkpoints
 __pycache__
+env
+server/logs
+server/env
