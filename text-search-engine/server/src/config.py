@@ -1,7 +1,5 @@
-import os
-
 ############### Raw Data File #####################
-DATA_PATH = "data/example.csv"
+DATA_PATH = "../data/example.csv"
 
 ############### Number of log files ###############
 LOGS_NUM = 0
@@ -18,9 +16,4 @@ TOP_K = 9
 NPROBE = 10
 
 ############## Model Configuration #################
-MODEL_PATH = 'zoo:nlp/masked_language_modeling/bert-base/pytorch/huggingface/wikipedia_bookcorpus/12layer_pruned80_quant-none-vnni'
-ENGINE = "deepsparse"
-SCHEDULE_TYPE = "async"
-NUM_STREAMS = 0
-SEQUENCE_LENGTH = 128
-BATCH_SIZE = 1
+MODEL_URL = "http://localhost:5543/predict"

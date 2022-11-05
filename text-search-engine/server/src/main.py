@@ -9,25 +9,19 @@ from operations.search import search_milvus
 from operations.count import do_count
 from operations.drop import do_drop
 from encode import SentenceModel
-from config import ENGINE, SCHEDULE_TYPE, NUM_STREAMS, SEQUENCE_LENGTH
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--schedule_type", type=str, default=SCHEDULE_TYPE)
-parser.add_argument("--num_streams", type=int, default=NUM_STREAMS)
-parser.add_argument("--engine", type=str, default=ENGINE)
-parser.add_argument("--sequence_length", type=int, default=SEQUENCE_LENGTH)
 
 # map from MilvusIDs to Text, Title Pairs
 # this should be a database endpoint in a real application
 data_map = {}
 
 def start_server(
-    model_config: dict,
     host: str = "0.0.0.0",
     port: int = 5000
 ):
     
-    MODEL = SentenceModel(**model_config)
+    MODEL = SentenceModel()
     MILVUS_CLI = MilvusHelper()
 
     app = FastAPI()
@@ -106,5 +100,5 @@ def start_server(
     uvicorn.run(app=app, host=host, port=port, workers=1)
 
 if __name__ == "__main__":
-    args = vars(parser.parse_args())
-    start_server(model_config=args)
+    args = parser.parse_args()
+    start_server()
