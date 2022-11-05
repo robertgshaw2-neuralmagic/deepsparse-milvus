@@ -1,0 +1,9 @@
+endpoints: 
+  - task: embedding_extraction
+    model: zoo:nlp/masked_language_modeling/bert-base/pytorch/huggingface/wikipedia_bookcorpus/pruned80_quant-none-vnni
+    route: /predict
+    name: embedding_extraction_pipeline
+    kwargs:
+      return_numpy: False
+      extraction_strategy: reduce_mean
+      sequence_length: 512
