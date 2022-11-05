@@ -1,5 +1,0 @@
-numpy
-sklearn
-pymilvus==2.0.1
-fastapi
-uvicorn
