@@ -2,5 +2,6 @@ volumes
 .ipynb_checkpoints
 __pycache__
 env
+test-env
 text-search-engine/server/logs
 text-search-engine/server/en
