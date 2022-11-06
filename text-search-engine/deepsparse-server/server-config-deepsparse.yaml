@@ -7,3 +7,4 @@ endpoints:
       return_numpy: False
       extraction_strategy: reduce_mean
       sequence_length: 512
+      engine_type: deepsparse
