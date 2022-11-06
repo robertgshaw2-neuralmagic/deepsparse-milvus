@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 from logs import LOGGER
 from milvus_helpers import MilvusHelper
+from mysql_helpers import MySQLHelper
 from operations.load import do_load
 from operations.search import search_milvus
 from operations.count import do_count
@@ -11,18 +12,17 @@ from operations.drop import do_drop
 from encode import SentenceModel
 
 parser = argparse.ArgumentParser()
-
-# map from MilvusIDs to Text, Title Pairs
-# this should be a database endpoint in a real application
-data_map = {}
+parser.add_argument('--data_path', type=str, default="../data/example.csv")
 
 def start_server(
+    data_path: str = "../data/example.csv",
     host: str = "0.0.0.0",
     port: int = 5000
 ):
     
     MODEL = SentenceModel()
     MILVUS_CLI = MilvusHelper()
+    MYSQL_CLI = MySQLHelper()
 
     app = FastAPI()
     app.add_middleware(
@@ -58,7 +58,7 @@ def start_server(
     async def drop_tables():
         # Delete the collection of Milvus and MySQL
         try:
-            status = do_drop(MILVUS_CLI)
+            status = do_drop(MILVUS_CLI, MYSQL_CLI)
             data_map = {}
             LOGGER.info("Successfully drop tables in Milvus!")
             return status
@@ -70,10 +70,8 @@ def start_server(
     def load_text():
         # Insert all the image under the file path to Milvus
         try:
-            data = do_load(MODEL, MILVUS_CLI)
-            for idx in data:
-                data_map[idx] = data[idx]
-            LOGGER.info(f"Successfully loaded data, total count: {len(data_map)}")
+            count = do_load(MODEL, MILVUS_CLI, MYSQL_CLI, data_path)
+            LOGGER.info(f"Successfully loaded data, total count: {count}")
             return "Successfully loaded data"
         except Exception as e:
             LOGGER.error(e)
@@ -83,10 +81,13 @@ def start_server(
     @app.get('/search')
     async def do_search_api(query_sentence: str = None):
         try:
-            ids, _ = search_milvus(query_sentence, MODEL, MILVUS_CLI)
+            ids, title, text, _ = search_milvus(query_sentence, MODEL, MILVUS_CLI, MYSQL_CLI)
             res = {}
-            for idx in ids:
-                res[idx] = data_map[idx]
+            for idx, title_i, text_i in zip(ids, title, text):
+                res[idx] = {
+                    'title': title_i, 
+                    'text' : text_i
+                }
             LOGGER.info("Successfully searched similar text!")
             return res
         except Exception as e:
@@ -101,4 +102,4 @@ def start_server(
 
 if __name__ == "__main__":
     args = parser.parse_args()
-    start_server()
+    start_server(args.data_path)

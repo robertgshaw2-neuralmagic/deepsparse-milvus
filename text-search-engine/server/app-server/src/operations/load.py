@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 
 sys.path.append("..")
-from config import DEFAULT_TABLE, DATA_PATH
+from config import DEFAULT_TABLE
 from logs import LOGGER
 
 # Get the vector of search
@@ -18,10 +18,20 @@ def extract_features(path, model):
         LOGGER.error(f" Error with extracting feature from question {e}")
         sys.exit(1)
 
+# format data for submission to mmysql
+def format_data_mysql(ids, title_data, text_data):
+    # combine the id of the vector and question data into list of tuples
+    data = []
+    for i in range(len(ids)):
+        value = (str(ids[i]), title_data[i], text_data[i])
+        data.append(value)
+    return data
+
 # Import vectors to milvus + create local lookup table
-def do_load(embedding_model, milvus_client, collection_name=DEFAULT_TABLE, data_path=DATA_PATH):
+def do_load(embedding_model, milvus_client, mysql_client, data_path, collection_name=DEFAULT_TABLE):
     title_data, text_data, sentence_embeddings = extract_features(data_path, embedding_model)
     ids = milvus_client.insert(collection_name, sentence_embeddings)
     milvus_client.create_index(collection_name)
-    data_map = {idx: {'title':title, 'content':text} for idx, title, text in zip(ids, title_data, text_data)}
-    return data_map
+    mysql_client.create_mysql_table(collection_name)
+    mysql_client.load_data_to_mysql(collection_name, format_data_mysql(ids, title_data, text_data))
+    return len(ids)

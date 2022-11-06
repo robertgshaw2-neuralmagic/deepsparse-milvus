@@ -1,6 +1,3 @@
-############### Raw Data File #####################
-DATA_PATH = "../data/example.csv"
-
 ############### Number of log files ###############
 LOGS_NUM = 0
 
@@ -15,5 +12,14 @@ DEFAULT_TABLE = "test_table"
 TOP_K = 9
 NPROBE = 10
 
+############### MySQL Configuration ###############
+MYSQL_HOST = "127.0.0.1"
+MYSQL_PORT = 3306
+MYSQL_USER = "root"
+MYSQL_PWD = "123456"
+MYSQL_DB = "mysql"
+
 ############## Model Configuration #################
-MODEL_URL = "http://localhost:5543/predict"
+MODEL_HOST = "localhost"
+MODEL_PORT = 5543
+MODEL_URL = f"http://{MODEL_HOST}:{MODEL_PORT}/predict"
