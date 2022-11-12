@@ -83,7 +83,6 @@ We have provided a configuration file in `/server/deepsparse-server/server-confi
 Here's what the config file looks like.
 
 ```yaml
-# num_cores: 8  # number of cores availble for use - defaults to all 
 num_workers: 4  # number of streams - should be tuned, num_cores / 2 is good place to start
 
 endpoints: 
