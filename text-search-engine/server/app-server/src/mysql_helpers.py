@@ -1,14 +1,15 @@
 import pymysql
 import sys
-from config import MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PWD, MYSQL_DB
+from config import MYSQL_PORT, MYSQL_USER, MYSQL_PWD, MYSQL_DB
 from logs import LOGGER
 
 class MySQLHelper():
     """
       class
     """
-    def __init__(self):
-        self.conn = pymysql.connect(host=MYSQL_HOST, user=MYSQL_USER, port=MYSQL_PORT, password=MYSQL_PWD,
+    def __init__(self, mysql_host):
+        self._mysql_host = mysql_host
+        self.conn = pymysql.connect(host=self._mysql_host, user=MYSQL_USER, port=MYSQL_PORT, password=MYSQL_PWD,
                                     database=MYSQL_DB,
                                     local_infile=True)
         self.cursor = self.conn.cursor()
@@ -17,7 +18,7 @@ class MySQLHelper():
         try:
             self.conn.ping()
         except Exception:
-            self.conn = pymysql.connect(host=MYSQL_HOST, user=MYSQL_USER, port=MYSQL_PORT, password=MYSQL_PWD,
+            self.conn = pymysql.connect(host=self._mysql_host, user=MYSQL_USER, port=MYSQL_PORT, password=MYSQL_PWD,
                                     database=MYSQL_DB,local_infile=True)
             self.cursor = self.conn.cursor()
 

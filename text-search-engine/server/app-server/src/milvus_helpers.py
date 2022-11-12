@@ -1,18 +1,18 @@
 import sys
 from pymilvus import connections, FieldSchema, CollectionSchema, DataType, Collection, utility
 
-from config import MILVUS_HOST, MILVUS_PORT, VECTOR_DIMENSION, METRIC_TYPE, INDEX_TYPE, NLIST, NPROBE
+from config import MILVUS_PORT, VECTOR_DIMENSION, METRIC_TYPE, INDEX_TYPE, NLIST, NPROBE
 from logs import LOGGER
 
 class MilvusHelper:
     """
       class
     """
-    def __init__(self):
+    def __init__(self, milvus_host):
         try:
             self.collection = None
-            connections.connect(host=MILVUS_HOST, port=MILVUS_PORT)
-            LOGGER.debug(f"Successfully connect to Milvus with IP:{MILVUS_HOST,} and PORT:{MILVUS_PORT}")
+            connections.connect(host=milvus_host, port=MILVUS_PORT)
+            LOGGER.debug(f"Successfully connect to Milvus with IP:{milvus_host,} and PORT:{MILVUS_PORT}")
         except Exception as e:
             LOGGER.error(f"Failed to connect Milvus: {e}")
             sys.exit(1)

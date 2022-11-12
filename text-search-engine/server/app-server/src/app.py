@@ -1,4 +1,4 @@
-import os
+import os, argparse
 import uvicorn
 from fastapi import FastAPI, File, UploadFile
 from starlette.middleware.cors import CORSMiddleware
@@ -11,14 +11,20 @@ from operations.count import do_count
 from operations.drop import do_drop
 from encode import SentenceModel
 
+parser = argparse.ArgumentParser()
+parser.add_argument("--database_host", type=str, default="127.0.0.1")
+parser.add_argument("--model_host", type=str, default="127.0.0.1")
+
 def start_server(
+    database_host,
+    model_host,
     host: str = "0.0.0.0",
     port: int = 5000
 ):
     
-    MODEL = SentenceModel()
-    MILVUS_CLI = MilvusHelper()
-    MYSQL_CLI = MySQLHelper()
+    MODEL = SentenceModel(model_host)
+    MILVUS_CLI = MilvusHelper(database_host)
+    MYSQL_CLI = MySQLHelper(database_host)
 
     app = FastAPI()
     app.add_middleware(
@@ -110,4 +116,5 @@ def start_server(
     uvicorn.run(app=app, host=host, port=port, workers=1)
 
 if __name__ == "__main__":
-    start_server()
+    args = vars(parser.parse_args())
+    start_server(args["database_host"], args["model_host"])
