@@ -373,3 +373,5 @@ Query Latency Stats:
  'median': 233.32067500450648,
  'std': 224.45764981095994}
 ```
+
+This has created an **xxxx** speedup in Model Latency.
