@@ -1,6 +1,6 @@
 # DeepSparse + Milvus: Text-Search with BERT
 
-This example demonstrates how to create a semantic search engine with a microservices architecture using FastAPI, DeepSparse, Milvus, and MySQL.
+This example demonstrates how to create a semantic search engine using FastAPI, DeepSparse, Milvus, and MySQL.
 
 We will create 4 services:
 - Milvus Server - vector database used to hold the embeddings of the dataset and perform the search queries
@@ -8,7 +8,7 @@ We will create 4 services:
 - DeepSparse Server - inference runtime used to generate the embeddings for the queries
 - Application Server - endpoint called by the client side with queries for searching
 
-We will demonstrate running on a single local machine as well as in a VPC on AWS with independent-scaling of the App, Database, and Model Serving Components.
+We will demonstrate running on a local machine as well as in a VPC on AWS with independent-scaling of the App, Database, and Model Serving Components.
 
 ## Text-Search with BERT - How/Why it Works
 
