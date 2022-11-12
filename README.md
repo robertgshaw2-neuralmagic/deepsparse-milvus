@@ -54,7 +54,7 @@ Milvus has a convient `docker-compose` file which can be downloaded with `wget` 
 ``` bash
 cd server/database-server
 wget https://raw.githubusercontent.com/milvus-io/milvus/master/deployments/docker/standalone/docker-compose.yml -O docker-compose.yml
-sudo docker compose up
+sudo docker-compose up
 cd ..
 
 ```
