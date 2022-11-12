@@ -145,4 +145,182 @@ python3 client/latency-test-client.py --url http://localhost:5000/ --dataset_pat
 - `--dataset_path` is the location of the dataset path on client side
 - `--num_clients` is the number of clients that will be created to send requests concurrently
 
-## Running on AWS in a VPC with Independent-Scaling
+## Running in an AWS VPC with Independent-Scaling
+
+### Create a VPC
+
+First, we will create a VPC that houses our instances and enables us to communicate between the App Server, Milvus, MySQL, and DeepSparse.
+
+- Navigate to `Create VPC` in the AWS console
+- Select `VPC and more`. Name it `semantic-search-demo-vpc`
+- Make sure you have `IPv4 CIDR block` set. We use `10.0.0.0/16` in the example.
+- Number of AZs to 1, Number of Public Subnets to 1, and Number of Private Subnets to 0.
+
+When we create our services, we will add them to the VPC and only enable communication to the backend model service and databases from within the VPC, isloating the model and database services from the internet.
+
+### Create the Database Server
+
+Launch an EC2 Instance.
+- Navigate to EC2 > Instances > Launch an Instance
+- Name the instance `database-server`
+- Select Amazon Linux and a `t2.micro` instance type
+
+Edit the `Network Setting` to expose the App Endpoint to the Internet while still giving access to the backend database and model service.
+- Put the `app-server` into the `semantic-search-demo-vpc` VPC
+- Choose the public subnet
+- Set `Auto-Assign Public IP` to `Enabled`.
+- Select Create Security Group
+- Leave the SSH security group rule in place
+- Add a `Custom TCP` security group rule with port `19530` with `source-type` of `Custom` and Source equal to the CIDR of the VPC (in our case `10.0.0.0/16`). This is how the App Server will Talk to Milvus
+- Add a `Custom TCP` security group rule with port `3306` with `source-type` of `Custom` and Source equal to the CIDR of the VPC (in our case `10.0.0.0/16`). This is how the App Server will Talk to MySQL
+
+Click Launch Instance.
+
+Next, SSH into your newly created instance and launch the app server.
+
+From the command line run:
+```
+ssh -i path/to/your/private-key.pem ec2-user@your-instance-public-ip
+```
+
+We will use Docker to launch the applicaiton.
+
+Install Docker and add group membership for the default ec2-user so you can run all docker commands without using the sudo command:
+```
+sudo yum update -y
+sudo yum install docker -y
+sudo usermod -a -G docker ec2-user
+id ec2-user
+newgrp docker
+``
+
+Start Docker and Check it is running with the following:
+```
+sudo service docker start
+docker container ls
+```
+
+Install `docker-compose` with: 
+```
+pip3 install --user docker-compose
+```
+
+Download Milvus Docker Image and Launch Milvus with `docker-compose`:
+```
+wget https://raw.githubusercontent.com/milvus-io/milvus/master/deployments/docker/standalone/docker-compose.yml -O docker-compose.yml
+docker-compose up
+```
+
+SSH from another terminal into the same instance to setup MySQL.
+```
+ssh -i path/to/your/private-key.pem ec2-user@your-instance-public-ip
+```
+
+Docker should already be installed, so run the following to launch MySQL.
+
+```bash
+docker run -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 -d mysql:5.7
+```
+Running `docker container ls` should show 4 containers running (`mysql`, `milvus-standalone`, `milvus-etcd`, and `milvus-minio`).
+
+Your databases are up and running!
+
+### Create the Application Server
+
+Launch an EC2 Instance.
+- Navigate to EC2 > Instances > Launch an Instance
+- Name the instance `app-server`
+- Select Amazon Linux and a `t2.micro` instance type
+
+Edit the `Network Setting` to expose the App Endpoint to the Internet while still giving access to the backend database and model service.
+- Put the `app-server` into the `semantic-search-demo-vpc` VPC
+- Choose the public subnet
+- Set `Auto-Assign Public IP` to `Enabled`.
+- Select Create Security Group
+- In addition to SSH, add a `Custom TCP` security group rule with port `5000` with `source-type` of `Anywhere`. This exposes the app over HTTP.
+
+Click Launch Instance.
+
+Next, SSH into your newly created instance and launch the app server.
+
+From the command line run:
+```
+ssh -i path/to/your/private-key.pem ec2-user@your-instance-public-ip
+```
+
+Clone this repo with Git:
+```bash
+sudo yum update -y
+sudo yum install git -y
+sudo git clone https://github.com/rsnm2/deepsparse-milvus.git
+```
+
+Install App Requirements in a virutal enviornment.
+```bash
+python3 -m venv app-env
+source app-env/bin/activate
+pip3 install -r deepsparse-milvus/text-search-engine/server/app-requirements.txt
+```
+
+Run the following to activate.
+```bash
+python3 deepsparse-milvus/text-search-engine/server/app-server/src/app.py
+```
+
+You should see a Uvicorn server running!
+
+### Create DeepSparse AWS Instance
+
+The last step is setting up a model service. Since the processing of embeddings is the most
+compute heavy portion of the application, we will use an instance with more cores.
+
+The `c6i.4xlarge` instance type. This is an 8 core instance with 32GB of RAM. Using a more powerful instance like 
+this will allow us to demonstrate the ability of the DeepSparse to handle multiple concurrent requests efficiently.
+
+Launch an EC2 Instance.
+- Navigate to EC2 > Instances > Launch an Instance
+- Name the instance `database-server`
+- Select Amazon Linux and a `c6i.4xlarge` instance type
+
+Edit the `Network Setting` to expose the App Endpoint to the Internet while still giving access to the backend database and model service.
+- Put the `app-server` into the `semantic-search-demo-vpc` VPC
+- Choose the public subnet
+- Set `Auto-Assign Public IP` to `Enabled`.
+- Select Create Security Group
+- Leave the SSH security group rule in place
+- Add a `Custom TCP` security group rule with port `5543` with `source-type` of `Custom` and Source equal to the CIDR of the VPC (in our case `10.0.0.0/16`). This is how the App Server will Talk to DeepSparse
+
+Click Launch Instance.
+
+Next, SSH into your newly created instance and launch the DeepSparse Server.
+
+From the command line run:
+```
+ssh -i path/to/your/private-key.pem ec2-user@your-instance-public-ip
+```
+
+Clone this repo with Git:
+```bash
+sudo yum update -y
+sudo yum install git -y
+git clone https://github.com/rsnm2/deepsparse-milvus.git
+```
+
+Install App Requirements in a virutal enviornment.
+```bash
+python3 -m venv deepsparse-env
+source deepsparse-env/bin/activate
+pip3 install -r deepsparse-milvus/text-search-engine/server/deepsparse-requirements.txt
+```
+
+Run the following to start a model server with DeepSparse as the runtime engine. 
+```bash
+deepsparse.server --config-file deepsparse-milvus/text-search-engine/server/deepsparse-server/server-config-onnxruntime.yaml```
+```
+
+We have also provided a config file with ONNX as the runtime engine for performance comparison. You can launch a server with ONNX Runtime with the following:
+```bash
+deepsparse.server --config-file deepsparse-milvus/text-search-engine/server/deepsparse-server/server-config-onnxruntime.yaml
+```
+
+You should see a Uvicorn server running!
