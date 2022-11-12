@@ -164,7 +164,7 @@ sudo usermod -a -G docker ec2-user
 id ec2-user
 newgrp docker
 pip3 install --user docker-compose
-``
+```
 
 Start Docker and Check it is running with the following:
 ```
@@ -217,13 +217,6 @@ sudo yum install git -y
 sudo git clone https://github.com/rsnm2/deepsparse-milvus.git
 ```
 
-TO BE REMOVED --- hack to remove bug in Server
-
-- Run `vim deepsparse-env/lib/python3.7/site-packages/deepsparse/server/server.py`
-- In `_add_pipeline_endpoint()`, udpate `app.add_api_route` by commenting out `response_model=output_schema`.
-
-ESC-I enters insert mode; ESC Exits insert mode. :wq writes file and quits.
-
 Install App Requirements in a virutal enviornment.
 ```bash
 python3 -m venv app-env
@@ -233,7 +226,7 @@ pip3 install -r deepsparse-milvus/text-search-engine/server/app-requirements.txt
 
 Run the following to activate.
 ```bash
-python3 deepsparse-milvus/text-search-engine/server/app-server/src/app.py
+python3 deepsparse-milvus/text-search-engine/server/app-server/src/app.py --database host private.ip.of.database.server --model_host private.ip.of.model.server
 ```
 
 Your App Server is up and Running!
@@ -269,6 +262,12 @@ python3 -m venv deepsparse-env
 source deepsparse-env/bin/activate
 pip3 install -r deepsparse-milvus/text-search-engine/server/deepsparse-requirements.txt
 ```
+
+TO BE REMOVED --- hack to remove bug in Server
+
+- Run `vim deepsparse-env/lib/python3.7/site-packages/deepsparse/server/server.py`
+- In `_add_pipeline_endpoint()`, udpate `app.add_api_route` by commenting out `response_model=output_schema`.
+
 
 Run the following to start a model server with DeepSparse as the runtime engine. 
 ```bash
