@@ -1,9 +1,7 @@
 ############### Number of log files ###############
 LOGS_NUM = 0
-DATABASE_HOST = "10.0.8.204"
 
 ############### Milvus Configuration ###############
-MILVUS_HOST = DATABASE_HOST
 MILVUS_PORT = 19530
 VECTOR_DIMENSION = 768
 METRIC_TYPE = "L2"
@@ -14,13 +12,10 @@ TOP_K = 9
 NPROBE = 10
 
 ############### MySQL Configuration ###############
-MYSQL_HOST = DATABASE_HOST
 MYSQL_PORT = 3306
 MYSQL_USER = "root"
 MYSQL_PWD = "123456"
 MYSQL_DB = "mysql"
 
 ############## Model Configuration #################
-MODEL_HOST = "localhost"
 MODEL_PORT = 5543
-MODEL_URL = f"http://{MODEL_HOST}:{MODEL_PORT}/predict"

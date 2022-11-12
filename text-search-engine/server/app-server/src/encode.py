@@ -1,16 +1,16 @@
 from queue import Queue
-from config import MODEL_URL
 from typing import List
+from config import MODEL_PORT
 import numpy as np
 import time, requests, json
 from sklearn.preprocessing import normalize
 
 class SentenceModel:
     def __init__(self, 
-        model_url=MODEL_URL,
+        model_host="localhost",
         timing=True
     ):
-        self._model_url = model_url
+        self._model_url = f"http://{model_host}:{MODEL_PORT}/predict"
         self._timing = timing
         if self._timing:
             self._time_queue = Queue()
