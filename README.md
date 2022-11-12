@@ -285,10 +285,10 @@ deepsparse.server --config-file deepsparse-milvus/text-search-engine/server/deep
 
 ### Benchmark Performance
 
-From your local machine, run the following, which creats 8 clients that continously make requests to the server.
+From your local machine, run the following, which creates 4 clients that continously make requests to the server.
 
 ```bash
-python3 client/latency-test-client.py --url http://app-server-public-ip:5000/ --dataset_path client/example.csv --num_clients 8 --iters_per_client 25
+python3 client/latency-test-client.py --url http://app-server-public-ip:5000/ --dataset_path client/example.csv --num_clients 4 --iters_per_client 25
 ```
 
 With DeepSparse running in the Model Server, the latency looks like this, where Model Latency is the time it takes to process
@@ -297,15 +297,15 @@ a request by Model Server and Query Latency is the full end to end time on the c
 ```
 Model Latency Stats:
 {'count': 100,
- 'mean': 101.46937451000213,
- 'median': 101.42159349993563,
- 'std': 0.8363166606434379}
+ 'mean': 97.6392858400186,
+ 'median': 97.46583750006721,
+ 'std': 0.7766356131548698}
 
 Query Latency Stats:
 {'count': 100,
- 'mean': 290.0473149998288,
- 'median': 233.32067500450648,
- 'std': 224.45764981095994}
+ 'mean': 425.1315195999632,
+ 'median': 425.0526745017851,
+ 'std': 34.73163016766087}
 ```
 
 With ONNX Runtime running in the Model Server, the latency looks like this:
