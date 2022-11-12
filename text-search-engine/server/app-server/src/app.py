@@ -1,6 +1,6 @@
+import os
 import uvicorn
-import argparse
-from fastapi import FastAPI
+from fastapi import FastAPI, File, UploadFile
 from starlette.middleware.cors import CORSMiddleware
 from logs import LOGGER
 from milvus_helpers import MilvusHelper
@@ -11,11 +11,7 @@ from operations.count import do_count
 from operations.drop import do_drop
 from encode import SentenceModel
 
-parser = argparse.ArgumentParser()
-parser.add_argument('--data_path', type=str, default="../data/example.csv")
-
 def start_server(
-    data_path: str = "../data/example.csv",
     host: str = "0.0.0.0",
     port: int = 5000
 ):
@@ -67,12 +63,25 @@ def start_server(
             return {'status': False, 'msg': e}, 400
 
     @app.post('/load')
-    def load_text():
-        # Insert all the image under the file path to Milvus
+    async def load_text(file: UploadFile = File(...),):
+        data_path = None
         try:
-            count = do_load(MODEL, MILVUS_CLI, MYSQL_CLI, data_path)
+            text = await file.read()
+            fname = file.filename
+            dirs = "data"
+            if not os.path.exists(dirs):
+                os.makedirs(dirs)
+            data_path = os.path.join(os.getcwd(), os.path.join(dirs, fname))
+            with open(data_path, 'wb') as f:
+                f.write(text)
+        except Exception :
+            return {'status': False, 'msg': 'Failed to load data.'}
+        
+        # Insert all data in file path to Milvus
+        try:
+            count, inference_time, db_load_time = do_load(MODEL, MILVUS_CLI, MYSQL_CLI, data_path)
             LOGGER.info(f"Successfully loaded data, total count: {count}")
-            return "Successfully loaded data"
+            return f"Successfully loaded data. Inference Time {inference_time}; DB Load Time {db_load_time}"
         except Exception as e:
             LOGGER.error(e)
             return {'status': False, 'msg': e}, 400
@@ -101,5 +110,4 @@ def start_server(
     uvicorn.run(app=app, host=host, port=port, workers=1)
 
 if __name__ == "__main__":
-    args = parser.parse_args()
-    start_server(args.data_path)
+    start_server()

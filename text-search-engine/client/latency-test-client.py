@@ -1,18 +1,20 @@
 import requests, argparse, json, threading, queue, time, numpy
 from pprint import pprint
 
+DATASET_PATH = "client/example.csv"
 URL = "http://localhost:5000/"
-ITERS = 200
+ITERS = 100
 NUM_CLIENTS = 1
-SENTENCE = "The United States has brokered a cease-fire between a renegade Afghan militia leader and the  embattled governor of the western province of Herat,  Washington's envoy to Kabul said Tuesday."
+SENTENCE = "The United States has brokered a cease-fire between a renegade Afghan militia leader and the embattled governor of the western province of Herat,  Washington's envoy to Kabul said Tuesday."
 QUERY = "query_sentence=" + SENTENCE
 
 parser = argparse.ArgumentParser()
+parser.add_argument("--dataset_path", type=str, default=DATASET_PATH)
 parser.add_argument("--url", type=str, default=URL)
 parser.add_argument("--iters_per_client", type=int, default=ITERS)
 parser.add_argument("--num_clients", type=int, default=NUM_CLIENTS)
 
-def setup_test(url: str):
+def setup_test(url: str, dataset_path: str):
     print("\nSETUP TESTING:")
 
     print("\nDropping existing collections, if they exist ...")
@@ -20,7 +22,7 @@ def setup_test(url: str):
     print(resp.text)
 
     print("\nReloading dataset into Milvus ...")
-    resp = requests.post(url + "load")
+    resp = requests.post(url + "load", files={'file': open(dataset_path, 'rb')})
     print(resp.text)
 
     print("\nConfirming 160 items in Milvus ...")
@@ -96,7 +98,7 @@ if __name__ == "__main__":
     args = vars(parser.parse_args())
 
     # setup + warmup
-    setup_test(args['url'])
+    setup_test(args['url'], args['dataset_path'])
     
     # run the actual tests
     run_test(

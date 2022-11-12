@@ -22,13 +22,13 @@ class SentenceModel:
         response = requests.post(self._model_url, json=obj)
         return json.loads(response.text)["embeddings"]
 
-    def sentence_encode(self, data:List[str]):
+    def sentence_encode(self, data:List[str], is_load=False):
         start = time.perf_counter()
         embedding = self.make_inference_request(data)
         sentence_embeddings = normalize(np.array(embedding)).tolist()
         end = time.perf_counter()
 
-        if self._timing:
+        if self._timing and not is_load:
             self._time_queue.put([start, end])
         
         return sentence_embeddings
