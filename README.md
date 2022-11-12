@@ -255,6 +255,13 @@ sudo yum install git -y
 sudo git clone https://github.com/rsnm2/deepsparse-milvus.git
 ```
 
+TO BE REMOVED --- hack to remove bug in Server
+
+- Run `vim deepsparse-env/lib/python3.7/site-packages/deepsparse/server/server.py`
+- In `_add_pipeline_endpoint()`, udpate `app.add_api_route` by commenting out `response_model=output_schema`.
+
+ESC-I enters insert mode; ESC Exits insert mode. :wq writes file and quits.
+
 Install App Requirements in a virutal enviornment.
 ```bash
 python3 -m venv app-env
@@ -318,9 +325,51 @@ Run the following to start a model server with DeepSparse as the runtime engine.
 deepsparse.server --config-file deepsparse-milvus/text-search-engine/server/deepsparse-server/server-config-onnxruntime.yaml```
 ```
 
+You should see a Uvicorn server running!
+
 We have also provided a config file with ONNX as the runtime engine for performance comparison. You can launch a server with ONNX Runtime with the following:
 ```bash
-deepsparse.server --config-file deepsparse-milvus/text-search-engine/server/deepsparse-server/server-config-onnxruntime.yaml
+deepsparse.server --config-file deepsparse-milvus/text-search-engine/server/deepsparse-server/server-config-onnx.yaml
+```
+**Note: you should have either DeepSparse or ONNXRuntime running but not both***
+
+## **Test Performance**
+
+From your local machine, run the following, which creats 8 clients that continously make requests to the server.
+
+```bash
+python3 client/latency-test-client.py --url http://app-server-public-ip:5000/ --dataset_path client/example.csv --num_clients 8 --iters_per_client 25
 ```
 
-You should see a Uvicorn server running!
+With DeepSparse running in the Model Server, the latency looks like this, where Model Latency is the time it takes to process
+a request by Model Server and Query Latency is the full end to end time on the client side (Network Latency + Model Latency + Database Latency).
+
+```
+Model Latency Stats:
+{'count': 100,
+ 'mean': 101.46937451000213,
+ 'median': 101.42159349993563,
+ 'std': 0.8363166606434379}
+
+Query Latency Stats:
+{'count': 100,
+ 'mean': 290.0473149998288,
+ 'median': 233.32067500450648,
+ 'std': 224.45764981095994}
+```
+
+With ONNX Runtime running in the Model Server, the latency looks like this:
+
+```
+Model Latency Stats:
+{'count': 100,
+ 'mean': 101.46937451000213,
+ 'median': 101.42159349993563,
+ 'std': 0.8363166606434379}
+
+Query Latency Stats:
+{'count': 100,
+ 'mean': 290.0473149998288,
+ 'median': 233.32067500450648,
+ 'std': 224.45764981095994}
+```
