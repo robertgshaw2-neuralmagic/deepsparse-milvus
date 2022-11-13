@@ -308,20 +308,4 @@ Query Latency Stats:
  'std': 34.73163016766087}
 ```
 
-With ONNX Runtime running in the Model Server, the latency looks like this:
-
-```
-Model Latency Stats:
-{'count': 100,
- 'mean': 101.46937451000213,
- 'median': 101.42159349993563,
- 'std': 0.8363166606434379}
-
-Query Latency Stats:
-{'count': 100,
- 'mean': 290.0473149998288,
- 'median': 233.32067500450648,
- 'std': 224.45764981095994}
-```
-
-This has created an **xxxx** speedup in Model Latency.
+**RS Note: when scaling this out with more clients, the rest of the system becomes the bottleneck for scaling. So, need to investigate a bit more how to show off the performance of DeepSparse**
