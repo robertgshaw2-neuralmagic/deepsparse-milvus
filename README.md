@@ -143,7 +143,7 @@ When we create our services, we will add them to the VPC and only enable communi
 Launch an EC2 Instance.
 - Navigate to EC2 > Instances > Launch an Instance
 - Name the instance `database-server`
-- Select Amazon Linux and a `xxx` instance type
+- Select Amazon Linux
 
 Edit the `Network Setting`.
 - Put the `app-server` into the `semantic-search-demo-vpc` VPC
@@ -195,7 +195,7 @@ Your databases are up and running!
 Launch an EC2 Instance.
 - Navigate to EC2 > Instances > Launch an Instance
 - Name the instance `app-server`
-- Select Amazon Linux and a `xxx` instance type
+- Select Amazon Linux
 
 Edit the `Network Setting` to expose the App Endpoint to the Internet while still giving access to the backend database and model service.
 - Put the `app-server` into the `semantic-search-demo-vpc` VPC
