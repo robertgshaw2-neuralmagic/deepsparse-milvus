@@ -113,7 +113,7 @@ def start_server(
     # note: FastAPI handles concurrent request via a ThreadPool
     # note: DeepSparse Pipelines handle concurrent inferences via a ThreadPool
     #       and DeepSparse engine can handle multiple input streams
-    uvicorn.run(app=app, host=host, port=port, workers=1)
+    uvicorn.run(app=app, host=host, port=port, workers=4)
 
 if __name__ == "__main__":
     args = vars(parser.parse_args())
